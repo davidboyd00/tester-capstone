@@ -1,12 +1,12 @@
 import { Controller, Post, Get, Body, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../../common/guards/roles.guard';
-import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { Public } from '../../common/decorators/public.decorator';
 import { Role } from '../../common/enums';
 
 @ApiTags('auth')
@@ -14,9 +14,10 @@ import { Role } from '../../common/enums';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Login - retorna JWT' })
+  @ApiOperation({ summary: 'Login - retorna access + refresh token' })
   @ApiResponse({ status: 200, description: 'Login exitoso' })
   @ApiResponse({ status: 401, description: 'Credenciales incorrectas' })
   async login(@Body() dto: LoginDto) {
@@ -24,7 +25,6 @@ export class AuthController {
   }
 
   @Post('register')
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Crear usuario (solo admin)' })
@@ -34,8 +34,27 @@ export class AuthController {
     return this.authService.register(dto);
   }
 
+  @Public()
+  @UseGuards(AuthGuard('jwt-refresh'))
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Renovar tokens con refresh token' })
+  @ApiResponse({ status: 200, description: 'Tokens renovados' })
+  @ApiResponse({ status: 403, description: 'Refresh token invalido' })
+  async refresh(@CurrentUser() user: any) {
+    return this.authService.refreshTokens(user.id, user.refreshToken);
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Cerrar sesion (invalida refresh token)' })
+  @ApiResponse({ status: 200, description: 'Sesion cerrada' })
+  async logout(@CurrentUser('id') userId: string) {
+    return this.authService.logout(userId);
+  }
+
   @Get('me')
-  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Obtener perfil del usuario actual' })
   async getProfile(@CurrentUser('id') userId: string) {

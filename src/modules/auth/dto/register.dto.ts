@@ -11,16 +11,16 @@ export class RegisterDto {
   @IsString()
   name: string;
 
-  @ApiProperty({ example: 'password123' })
+  @ApiProperty({ example: 'SecurePass123!' })
   @IsString()
-  @MinLength(6)
+  @MinLength(8)
   password: string;
 
-  @ApiProperty({ enum: Role, example: Role.EDITOR })
+  @ApiProperty({ enum: Role, example: Role.STORE_USER })
   @IsEnum(Role)
   role: Role;
 
-  @ApiPropertyOptional({ description: 'ID de la tienda (requerido para editor/viewer)' })
+  @ApiPropertyOptional({ description: 'ID de la tienda (requerido para store_user)' })
   @IsOptional()
   @IsUUID()
   storeId?: string;
