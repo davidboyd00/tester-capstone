@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
+import { APP_GUARD } from '@nestjs/core';
 
 import databaseConfig from './config/database.config';
 import bsaleConfig from './config/bsale.config';
@@ -9,7 +10,12 @@ import jwtConfig from './config/jwt.config';
 
 import { AuthModule } from './modules/auth/auth.module';
 import { StoresModule } from './modules/stores/stores.module';
+<<<<<<< HEAD
 import { SalesModule } from './modules/sales/sales.module';
+=======
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { RolesGuard } from './common/guards/roles.guard';
+>>>>>>> a38d985 (feat(auth): JWT con refresh tokens, roles store_user, guards globales)
 
 @Module({
   imports: [
@@ -52,6 +58,12 @@ import { SalesModule } from './modules/sales/sales.module';
     // TODO B3: descomentar cuando esten listos
     // FormsModule,
     // ReportsModule,
+  ],
+  providers: [
+    // Guards globales: todos los endpoints requieren JWT
+    // excepto los marcados con @Public()
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: RolesGuard },
   ],
 })
 export class AppModule {}

@@ -50,13 +50,32 @@ export async function runSeed(dataSource: DataSource) {
     const admin = userRepo.create({
       email: 'admin@coaniquem.cl',
       name: 'Administrador',
-      password: await bcrypt.hash('admin123', 10),
+      password: await bcrypt.hash('Admin2026!', 12),
       role: Role.ADMIN,
       storeId: null,
     });
     await userRepo.save(admin);
-    console.log('Seed: usuario admin creado (admin@coaniquem.cl / admin123)');
+    console.log('Seed: usuario admin creado (admin@coaniquem.cl / Admin2026!)');
   } else {
     console.log('Seed: usuario admin ya existe');
+  }
+
+  // Seed store_user de prueba (Providencia)
+  const existingStoreUser = await userRepo.findOne({ where: { email: 'jefe.providencia@coaniquem.cl' } });
+  if (!existingStoreUser) {
+    const providencia = await storeRepo.findOne({ where: { name: 'Providencia' } });
+    if (providencia) {
+      const storeUser = userRepo.create({
+        email: 'jefe.providencia@coaniquem.cl',
+        name: 'Jefe Tienda Providencia',
+        password: await bcrypt.hash('Tienda2026!', 12),
+        role: Role.STORE_USER,
+        storeId: providencia.id,
+      });
+      await userRepo.save(storeUser);
+      console.log('Seed: store_user creado (jefe.providencia@coaniquem.cl / Tienda2026!)');
+    }
+  } else {
+    console.log('Seed: store_user ya existe');
   }
 }
