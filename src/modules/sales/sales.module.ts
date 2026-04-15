@@ -10,4 +10,4 @@ import { Sale } from './entities/sale.entity';
   providers: [SalesService],
   exports: [SalesService],
 })
-export class StoresModule {}
+export class SalesModule {}
