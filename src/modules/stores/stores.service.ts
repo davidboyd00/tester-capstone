@@ -17,7 +17,7 @@ export class StoresService {
     return this.storesRepository.find({ where: { isActive: true }, order: { name: 'ASC' } });
   }
 
-  async findOne(id: string) {
+  async findOne(id: number) {
     const store = await this.storesRepository.findOne({ where: { id } });
     if (!store) throw new NotFoundException('Tienda no encontrada');
     return store;
@@ -30,7 +30,7 @@ export class StoresService {
     return saved;
   }
 
-  async update(id: string, dto: Partial<CreateStoreDto>) {
+  async update(id: number, dto: Partial<CreateStoreDto>) {
     await this.findOne(id);
     await this.storesRepository.update(id, dto);
     return this.findOne(id);

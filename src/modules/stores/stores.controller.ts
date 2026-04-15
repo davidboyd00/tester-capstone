@@ -22,7 +22,7 @@ export class StoresController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Obtener detalle de una tienda' })
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: number) {
     return this.storesService.findOne(id);
   }
 
@@ -38,7 +38,7 @@ export class StoresController {
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Editar tienda (solo admin)' })
-  update(@Param('id') id: string, @Body() dto: Partial<CreateStoreDto>) {
+  update(@Param('id') id: number, @Body() dto: Partial<CreateStoreDto>) {
     return this.storesService.update(id, dto);
   }
 }

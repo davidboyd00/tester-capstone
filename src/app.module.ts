@@ -9,6 +9,7 @@ import jwtConfig from './config/jwt.config';
 
 import { AuthModule } from './modules/auth/auth.module';
 import { StoresModule } from './modules/stores/stores.module';
+import { SalesModule } from './modules/sales/sales.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { StoresModule } from './modules/stores/stores.module';
     // Modulos activos
     AuthModule,
     StoresModule,
+    SalesModule
 
     // TODO B1: descomentar cuando esten listos
     // BsaleSyncModule,

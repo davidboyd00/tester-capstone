@@ -11,18 +11,31 @@ export class CreateStoreDto {
   @IsString()
   bsaleOfficeId?: string;
 
+  @ApiProperty({ example: 'Providencia' })
+  @IsString()
+  city: string;
+
+  @ApiPropertyOptional({ example: 'Metropolitana' })
+  @IsOptional()
+  @IsString()
+  municipality?: string;
+
   @ApiPropertyOptional({ example: 'Av. Providencia 291' })
   @IsOptional()
   @IsString()
   address?: string;
 
-  @ApiPropertyOptional({ example: 'Metropolitana' })
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  region?: string;
+  email: string;
+  
+  @ApiProperty({ example: 'L-V'})
+  @IsString()
+  attentionType: string;
 
-  @ApiPropertyOptional({ example: 'Providencia' })
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  city?: string;
+  cluster: string;
 }
