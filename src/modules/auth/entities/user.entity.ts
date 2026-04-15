@@ -23,7 +23,7 @@ export class User {
   role: Role;
 
   @Column({ nullable: true })
-  storeId: string;
+  storeId: number;
 
   @ManyToOne(() => Store, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'storeId' })
