@@ -10,6 +10,9 @@ import jwtConfig from './config/jwt.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { StoresModule } from './modules/stores/stores.module';
 import { SalesModule } from './modules/sales/sales.module';
+import { ProductsRackModule } from './modules/products-racks/products-rack.module';
+import { RacksModule } from './modules/racks/racks.module';
+import { StorageInventoryModule } from './modules/storageInventory/storage-inventory.module';
 
 @Module({
   imports: [
@@ -39,7 +42,10 @@ import { SalesModule } from './modules/sales/sales.module';
     // Modulos activos
     AuthModule,
     StoresModule,
-    SalesModule
+    SalesModule,
+    ProductsRackModule,
+    RacksModule,
+    StorageInventoryModule,
 
     // TODO B1: descomentar cuando esten listos
     // BsaleSyncModule,
