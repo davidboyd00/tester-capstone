@@ -1,14 +1,17 @@
 import { DataSource } from "typeorm"
 import { config } from "dotenv"
 
-const AppDataSource = new DataSource({
+config()
+
+export const AppDataSource = new DataSource({
     type: "postgres",
-    host: process.env.host,
-    port: parseInt(process.env.port),
-    username: process.env.database_user,
-    password: process.env.database_password,
-    database: process.env.database_name,
-    migrations: ['database' + '/migrations/**/*{.js,.ts}']
+    host: process.env.DATABASE_HOST,
+    port: parseInt(process.env.DATABASE_PORT),
+    username: process.env.DATABASE_USER,
+    password: process.env.DATABASE_PASSWORD,
+    database: process.env.DATABASE_NAME,
+    entities: ['src/**/*.entity{.ts,.js}'], 
+    migrations: ['src/database/migrations/**/*{.js,.ts}']
 }) 
 
 try {
@@ -17,5 +20,3 @@ try {
 } catch (error) {
     console.error("Error during Data Source initialization", error)
 }
-
-export default AppDataSource

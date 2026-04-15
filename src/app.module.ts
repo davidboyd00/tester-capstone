@@ -16,6 +16,8 @@ import { SalesModule } from './modules/sales/sales.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 >>>>>>> a38d985 (feat(auth): JWT con refresh tokens, roles store_user, guards globales)
+import { GoalsModule } from './modules/goals/goals.module';
+import { ProductsModule } from './modules/products/products.module';
 
 @Module({
   imports: [
@@ -35,7 +37,7 @@ import { RolesGuard } from './common/guards/roles.guard';
         password: config.get('database.password'),
         database: config.get('database.database'),
         autoLoadEntities: true,
-        synchronize: config.get('NODE_ENV') === 'development',
+        synchronize: false,
         logging: config.get('NODE_ENV') === 'development' ? ['error'] : false,
       }),
     }),
@@ -45,7 +47,9 @@ import { RolesGuard } from './common/guards/roles.guard';
     // Modulos activos
     AuthModule,
     StoresModule,
-    SalesModule
+    SalesModule,
+    GoalsModule,
+    ProductsModule,
 
     // TODO B1: descomentar cuando esten listos
     // BsaleSyncModule,
