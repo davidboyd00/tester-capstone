@@ -10,15 +10,15 @@ import jwtConfig from './config/jwt.config';
 
 import { AuthModule } from './modules/auth/auth.module';
 import { StoresModule } from './modules/stores/stores.module';
-<<<<<<< HEAD
 import { SalesModule } from './modules/sales/sales.module';
-=======
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
->>>>>>> a38d985 (feat(auth): JWT con refresh tokens, roles store_user, guards globales)
 import { GoalsModule } from './modules/goals/goals.module';
 import { ProductsModule } from './modules/products/products.module';
 
+import { ProductsRackModule } from './modules/products-racks/products-rack.module';
+import { RacksModule } from './modules/racks/racks.module';
+import { StorageInventoryModule } from './modules/storageInventory/storage-inventory.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -50,6 +50,9 @@ import { ProductsModule } from './modules/products/products.module';
     SalesModule,
     GoalsModule,
     ProductsModule,
+    ProductsRackModule,
+    RacksModule,
+    StorageInventoryModule,
 
     // TODO B1: descomentar cuando esten listos
     // BsaleSyncModule,
