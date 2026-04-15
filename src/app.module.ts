@@ -10,6 +10,8 @@ import jwtConfig from './config/jwt.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { StoresModule } from './modules/stores/stores.module';
 import { SalesModule } from './modules/sales/sales.module';
+import { GoalsModule } from './modules/goals/goals.module';
+import { ProductsModule } from './modules/products/products.module';
 
 @Module({
   imports: [
@@ -29,7 +31,7 @@ import { SalesModule } from './modules/sales/sales.module';
         password: config.get('database.password'),
         database: config.get('database.database'),
         autoLoadEntities: true,
-        synchronize: config.get('NODE_ENV') === 'development',
+        synchronize: false,
         logging: config.get('NODE_ENV') === 'development' ? ['error'] : false,
       }),
     }),
@@ -39,7 +41,9 @@ import { SalesModule } from './modules/sales/sales.module';
     // Modulos activos
     AuthModule,
     StoresModule,
-    SalesModule
+    SalesModule,
+    GoalsModule,
+    ProductsModule,
 
     // TODO B1: descomentar cuando esten listos
     // BsaleSyncModule,
