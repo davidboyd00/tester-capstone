@@ -1,12 +1,22 @@
-import { Entity, Column, PrimaryColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Product } from "../../products/entities/product.entity"
+import { Store } from "../../stores/entities/store.entity"
 
 @Entity('storage_inventory')
 export class StorageInventory {
     @PrimaryColumn({ type: 'int'})
-    productId: number; // Cuando exista Product: @ManyToOne(() => Product) @JoinColumn({ name: 'productId' }) product: Product;
+    productId: number;
+
+    @ManyToOne(() => Product)
+    @JoinColumn({ name: 'productId' })
+    product: Product;
 
     @PrimaryColumn({ type: 'int' })
-    storeId: number; // Cuando lo relaciones: @ManyToOne(() => Store) @JoinColumn({ name: 'storeId' }) store: Store;
+    storeId: number;
+
+    @ManyToOne(() => Store)
+    @JoinColumn({ name: 'storeId' })
+    store: Store;
 
     @Column({ type: 'int' })
     numSack: number;

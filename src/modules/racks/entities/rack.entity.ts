@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Store } from "../../stores/entities/store.entity"
 
 @Entity('racks')
 export class Rack {
@@ -6,7 +7,11 @@ export class Rack {
     id: number;
 
     @Column({ type: 'int'})
-    storeId: number; // Mismo caso, cuando se relacione a Store usar @ManyToOne
+    storeId: number;
+
+    @ManyToOne(() => Store)
+    @JoinColumn({ name: 'storeId' })
+    store: Store;
 
     @Column({ type: 'varchar'})
     type: string;
