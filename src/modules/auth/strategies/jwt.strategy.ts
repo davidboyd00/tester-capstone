@@ -20,20 +20,8 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(payload: JwtPayload) {
-    const user = await this.userRepository.findOne({
-      where: { id: payload.sub, isActive: true },
-    });
-
-    if (!user) {
-      throw new UnauthorizedException('Usuario no encontrado o desactivado');
-    }
-
-    return {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      storeId: user.storeId,
-    };
+    const user = await this.userRepository.findOne({ where: { id: payload.sub, isActive: true } });
+    if (!user) throw new UnauthorizedException('Usuario no encontrado o desactivado');
+    return { id: user.id, email: user.email, name: user.name, role: user.role, storeId: user.storeId };
   }
 }

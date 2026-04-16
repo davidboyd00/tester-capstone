@@ -50,14 +50,14 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Cerrar sesion (invalida refresh token)' })
   @ApiResponse({ status: 200, description: 'Sesion cerrada' })
-  async logout(@CurrentUser('id') userId: string) {
+  async logout(@CurrentUser('id') userId: number) {
     return this.authService.logout(userId);
   }
 
   @Get('me')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Obtener perfil del usuario actual' })
-  async getProfile(@CurrentUser('id') userId: string) {
+  async getProfile(@CurrentUser('id') userId: number) {
     return this.authService.getProfile(userId);
   }
 }

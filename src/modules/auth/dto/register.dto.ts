@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength, IsEnum, IsOptional, IsUUID } from 'class-validator';
+import { IsEmail, IsString, MinLength, IsEnum, IsOptional, IsInt } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Role } from '../../../common/enums';
 
@@ -20,8 +20,8 @@ export class RegisterDto {
   @IsEnum(Role)
   role: Role;
 
-  @ApiPropertyOptional({ description: 'ID de la tienda (requerido para store_user)' })
+  @ApiPropertyOptional({ example: 1, description: 'ID de la tienda (requerido para store_user)' })
   @IsOptional()
-  @IsUUID()
-  storeId?: string;
+  @IsInt()
+  storeId?: number;
 }

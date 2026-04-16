@@ -6,8 +6,8 @@ import { Store } from '../../stores/entities/store.entity';
 
 @Entity('users')
 export class User {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Column({ unique: true })
   @Index()
@@ -23,7 +23,7 @@ export class User {
   role: Role;
 
   @Column({ nullable: true })
-  storeId: string;
+  storeId: number;
 
   @ManyToOne(() => Store, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'storeId' })

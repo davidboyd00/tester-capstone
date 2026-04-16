@@ -28,70 +28,43 @@ export class AuthService {
     private configService: ConfigService,
   ) {}
 
-  // ── LOGIN ─────────────────────────────────
   async login(dto: LoginDto) {
     const user = await this.usersRepository.findOne({
       where: { email: dto.email.toLowerCase() },
       select: ['id', 'email', 'name', 'password', 'role', 'storeId', 'isActive'],
     });
 
-    if (!user) {
-      throw new UnauthorizedException('Credenciales incorrectas');
-    }
+    if (!user) throw new UnauthorizedException('Credenciales incorrectas');
+    if (!user.isActive) throw new UnauthorizedException('Cuenta desactivada');
 
-    if (!user.isActive) {
-      throw new UnauthorizedException('Cuenta desactivada. Contacta al administrador');
-    }
-
-    const isPasswordValid = await bcrypt.compare(dto.password, user.password);
-    if (!isPasswordValid) {
-      throw new UnauthorizedException('Credenciales incorrectas');
-    }
+    const valid = await bcrypt.compare(dto.password, user.password);
+    if (!valid) throw new UnauthorizedException('Credenciales incorrectas');
 
     const tokens = await this.generateTokens(user);
     await this.updateRefreshTokenHash(user.id, tokens.refreshToken);
     await this.usersRepository.update(user.id, { lastLoginAt: new Date() });
 
     this.logger.log(`Login exitoso: ${user.email} (${user.role})`);
-
-    return {
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-      user: this.sanitizeUser(user),
-    };
+    return { ...tokens, user: this.sanitizeUser(user) };
   }
 
-  // ── REGISTER ──────────────────────────────
   async register(dto: RegisterDto) {
-    const exists = await this.usersRepository.findOne({
-      where: { email: dto.email.toLowerCase() },
-    });
+    const exists = await this.usersRepository.findOne({ where: { email: dto.email.toLowerCase() } });
+    if (exists) throw new ConflictException('El email ya esta registrado');
 
-    if (exists) {
-      throw new ConflictException('El email ya esta registrado');
-    }
-
-    // Validar: store_user debe tener storeId
     if (dto.role === Role.STORE_USER && !dto.storeId) {
       throw new ConflictException('store_user debe tener una tienda asignada');
     }
 
-    // Validar: storeId debe existir
     if (dto.storeId) {
-      const store = await this.storesRepository.findOne({
-        where: { id: dto.storeId, isActive: true },
-      });
-      if (!store) {
-        throw new ConflictException('La tienda no existe o esta desactivada');
-      }
+      const store = await this.storesRepository.findOne({ where: { id: dto.storeId, isActive: true } });
+      if (!store) throw new ConflictException('La tienda no existe o esta desactivada');
     }
-
-    const hashedPassword = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
 
     const user = this.usersRepository.create({
       email: dto.email.toLowerCase().trim(),
       name: dto.name.trim(),
-      password: hashedPassword,
+      password: await bcrypt.hash(dto.password, BCRYPT_ROUNDS),
       role: dto.role,
       storeId: dto.role === Role.ADMIN ? null : dto.storeId,
     });
@@ -101,16 +74,10 @@ export class AuthService {
 
     const tokens = await this.generateTokens(saved);
     await this.updateRefreshTokenHash(saved.id, tokens.refreshToken);
-
-    return {
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-      user: this.sanitizeUser(saved),
-    };
+    return { ...tokens, user: this.sanitizeUser(saved) };
   }
 
-  // ── REFRESH TOKENS ────────────────────────
-  async refreshTokens(userId: string, refreshToken: string) {
+  async refreshTokens(userId: number, refreshToken: string) {
     const user = await this.usersRepository.findOne({
       where: { id: userId },
       select: ['id', 'email', 'name', 'role', 'storeId', 'refreshTokenHash', 'isActive'],
@@ -120,90 +87,56 @@ export class AuthService {
       throw new ForbiddenException('Acceso denegado');
     }
 
-    const isTokenValid = await bcrypt.compare(refreshToken, user.refreshTokenHash);
-
-    if (!isTokenValid) {
-      // Posible robo de token: invalidar sesion
+    const valid = await bcrypt.compare(refreshToken, user.refreshTokenHash);
+    if (!valid) {
       await this.usersRepository.update(user.id, { refreshTokenHash: null });
       this.logger.warn(`Refresh token invalido para ${user.email}. Sesion invalidada`);
       throw new ForbiddenException('Refresh token invalido. Sesion cerrada por seguridad');
     }
 
-    // Rotar tokens (el anterior queda invalidado)
     const tokens = await this.generateTokens(user);
     await this.updateRefreshTokenHash(user.id, tokens.refreshToken);
-
-    return {
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-      user: this.sanitizeUser(user),
-    };
+    return { ...tokens, user: this.sanitizeUser(user) };
   }
 
-  // ── LOGOUT ────────────────────────────────
-  async logout(userId: string) {
+  async logout(userId: number) {
     await this.usersRepository.update(userId, { refreshTokenHash: null });
     return { message: 'Sesion cerrada correctamente' };
   }
 
-  // ── PROFILE ───────────────────────────────
-  async getProfile(userId: string) {
-    const user = await this.usersRepository.findOne({
-      where: { id: userId },
-      relations: ['store'],
-    });
-
-    if (!user) {
-      throw new UnauthorizedException('Usuario no encontrado');
-    }
+  async getProfile(userId: number) {
+    const user = await this.usersRepository.findOne({ where: { id: userId }, relations: ['store'] });
+    if (!user) throw new UnauthorizedException('Usuario no encontrado');
 
     return {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
+      id: user.id, email: user.email, name: user.name, role: user.role,
       storeId: user.storeId,
       store: user.store ? { id: user.store.id, name: user.store.name } : null,
-      lastLoginAt: user.lastLoginAt,
-      createdAt: user.createdAt,
+      lastLoginAt: user.lastLoginAt, createdAt: user.createdAt,
     };
   }
 
-  // ── PRIVATE HELPERS ───────────────────────
   private async generateTokens(user: User) {
-    const payload: JwtPayload = {
-      sub: user.id,
-      email: user.email,
-      role: user.role,
-      storeId: user.storeId,
-    };
-
+    const payload: JwtPayload = { sub: user.id, email: user.email, role: user.role, storeId: user.storeId };
     const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(payload, {
-        secret: this.configService.get<string>('jwt.accessSecret'),
-        expiresIn: this.configService.get<string>('jwt.accessExpiration') as any,
+      this.jwtService.signAsync({ ...payload }, {
+        secret: process.env.JWT_ACCESS_SECRET || 'coaniquem-access-secret',
+        expiresIn: process.env.JWT_ACCESS_EXPIRATION || '15m' as any,
       }),
-      this.jwtService.signAsync(payload, {
-        secret: this.configService.get<string>('jwt.refreshSecret'),
-        expiresIn: this.configService.get<string>('jwt.refreshExpiration') as any,
+      this.jwtService.signAsync({ ...payload }, {
+        secret: process.env.JWT_REFRESH_SECRET || 'coaniquem-refresh-secret',
+        expiresIn: process.env.JWT_REFRESH_EXPIRATION || '7d' as any,
       }),
     ]);
-
     return { accessToken, refreshToken };
   }
 
-  private async updateRefreshTokenHash(userId: string, refreshToken: string) {
+  private async updateRefreshTokenHash(userId: number, refreshToken: string) {
     const hash = await bcrypt.hash(refreshToken, BCRYPT_ROUNDS);
     await this.usersRepository.update(userId, { refreshTokenHash: hash });
   }
 
   private sanitizeUser(user: User) {
-    return {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      storeId: user.storeId,
-    };
+    return { id: user.id, email: user.email, name: user.name, role: user.role, storeId: user.storeId };
   }
 }

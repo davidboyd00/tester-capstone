@@ -10,12 +10,9 @@ import jwtConfig from './config/jwt.config';
 
 import { AuthModule } from './modules/auth/auth.module';
 import { StoresModule } from './modules/stores/stores.module';
-<<<<<<< HEAD
 import { SalesModule } from './modules/sales/sales.module';
-=======
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
->>>>>>> a38d985 (feat(auth): JWT con refresh tokens, roles store_user, guards globales)
 
 @Module({
   imports: [
@@ -42,26 +39,11 @@ import { RolesGuard } from './common/guards/roles.guard';
 
     ScheduleModule.forRoot(),
 
-    // Modulos activos
     AuthModule,
     StoresModule,
-    SalesModule
-
-    // TODO B1: descomentar cuando esten listos
-    // BsaleSyncModule,
-    // GoalsModule,
-
-    // TODO B2: descomentar cuando esten listos
-    // InventoryModule,
-    // ReplenishmentModule,
-
-    // TODO B3: descomentar cuando esten listos
-    // FormsModule,
-    // ReportsModule,
+    SalesModule,
   ],
   providers: [
-    // Guards globales: todos los endpoints requieren JWT
-    // excepto los marcados con @Public()
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
   ],
