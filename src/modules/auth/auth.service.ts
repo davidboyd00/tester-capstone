@@ -1,7 +1,6 @@
 import {
   Injectable, UnauthorizedException, ConflictException, ForbiddenException, Logger,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -25,7 +24,6 @@ export class AuthService {
     @InjectRepository(Store)
     private storesRepository: Repository<Store>,
     private jwtService: JwtService,
-    private configService: ConfigService,
   ) {}
 
   async login(dto: LoginDto) {
@@ -121,11 +119,11 @@ export class AuthService {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync({ ...payload }, {
         secret: process.env.JWT_ACCESS_SECRET || 'coaniquem-access-secret',
-        expiresIn: process.env.JWT_ACCESS_EXPIRATION || '15m' as any,
+        expiresIn: (process.env.JWT_ACCESS_EXPIRATION || '15m') as any,
       }),
       this.jwtService.signAsync({ ...payload }, {
         secret: process.env.JWT_REFRESH_SECRET || 'coaniquem-refresh-secret',
-        expiresIn: process.env.JWT_REFRESH_EXPIRATION || '7d' as any,
+        expiresIn: (process.env.JWT_REFRESH_EXPIRATION || '7d') as any,
       }),
     ]);
     return { accessToken, refreshToken };
